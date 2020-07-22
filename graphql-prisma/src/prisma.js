@@ -100,6 +100,6 @@ const updatePostForUser = async (postId, data) => {
 //   published: true,
 // }).then((data) => console.log(JSON.stringify(data, null, 2)));
 
-updatePostForUser('ckcwtzh9h00a80828nw0jg85c', {
-  title: 'this is my updated title from async awaits',
-}).then((data) => console.log(JSON.stringify(data, null, 2)));
+// updatePostForUser('ckcwtzh9h00a80828nw0jg85c', {
+//   title: 'this is my updated title from async awaits',
+// }).then((data) => console.log(JSON.stringify(data, null, 2)));
