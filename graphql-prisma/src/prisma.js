@@ -60,20 +60,28 @@ const prisma = new Prisma({
 // 2. fetch all of the info about the user
 
 const createPostForUser = async (authorId, data) => {
+  const userExists = await prisma.exists.User({ id: authorId });
+  if (!userExists) {
+    throw new Error('User Not Found!');
+  }
   const post = await prisma.mutation.createPost(
     {
       data: { ...data, author: { connect: { id: authorId } } },
     },
-    '{id}'
+    '{author {id name email posts {id title published}} }'
   );
-  const user = prisma.query.user(
-    { where: { id: authorId } },
-    '{id, name, email, posts {id, title, published}}'
-  );
-  return user;
+  // const user = prisma.query.user(
+  //   { where: { id: authorId } },
+  //   '{id, name, email, posts {id, title, published}}'
+  // );
+  return post.author;
 };
 
 const updatePostForUser = async (postId, data) => {
+  const postExists = await prisma.exists.Post({ id: postId });
+  if (!postExists) {
+    throw new Error('Post Not Found!');
+  }
   const updatedPost = await prisma.mutation.updatePost(
     {
       where: {
@@ -81,25 +89,40 @@ const updatePostForUser = async (postId, data) => {
       },
       data,
     },
-    '{author {id}}'
+    '{author {id name email posts {id, title, published}}}'
   );
-  const user = prisma.query.user(
-    {
-      where: {
-        id: updatedPost.author.id,
-      },
-    },
-    '{id name email posts {id, title published}}'
-  );
+  // const user = prisma.query.user(
+  //   {
+  //     where: {
+  //       id: updatedPost.author.id,
+  //     },
+  //   },
+  //   '{id name email posts {id, title published}}'
+  // );
 
-  return user;
+  return updatedPost.author;
 };
+
+// exists demo
+// prisma.exists
+//   .Comment({
+//     id: 'ckcwu9rjp00ek0828qtq3nxhh',
+//     author: {
+//       id: 'ckcwtit8n006f0828hp50u8rz',
+//     },
+//   })
+//   .then((res) => console.log(res));
+
 // createPostForUser('ckcwtit8n006f0828hp50u8rz', {
 //   title: 'This is post for sunitha from async await',
 //   body: 'This is body',
 //   published: true,
-// }).then((data) => console.log(JSON.stringify(data, null, 2)));
+// })
+//   .then((data) => console.log(JSON.stringify(data, null, 2)))
+//   .catch((err) => console.log(err.message));
 
-// updatePostForUser('ckcwtzh9h00a80828nw0jg85c', {
+// updatePostForUser('ckcwtzh9h00a80828nw0jg85d', {
 //   title: 'this is my updated title from async awaits',
-// }).then((data) => console.log(JSON.stringify(data, null, 2)));
+// })
+//   .then((data) => console.log(JSON.stringify(data, null, 2)))
+//   .catch((error) => console.log(error.message));
