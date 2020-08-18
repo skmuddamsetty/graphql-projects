@@ -3,30 +3,26 @@ import { GraphQLServer } from 'graphql-yoga';
 // Type Definitions (schema)
 const typeDefs = `
   type Query {
+    me: User!
+  }
+
+  type User {
     id: ID!
     name: String!
-    age: Int!
-    employed: Boolean!
-    gpa: Float
+    email: String!
+    age: Int
   }
 `;
 // Resolvers
 const resolvers = {
   Query: {
-    id() {
-      return 'abc123';
-    },
-    name() {
-      return 'John Doe';
-    },
-    age() {
-      return 29;
-    },
-    employed() {
-      return true;
-    },
-    gpa() {
-      return null;
+    me() {
+      return {
+        id: 'abc123',
+        name: 'Mike Doe',
+        email: 'mike@example.com',
+        age: 28,
+      };
     },
   },
 };
