@@ -4,7 +4,8 @@ import { GraphQLServer } from 'graphql-yoga';
 // Type Definitions (schema)
 const typeDefs = `
   type Query {
-    me: User!
+    greeting(name: String): String!,
+    me: User!,
     post: Post!
   }
 
@@ -41,6 +42,10 @@ const resolvers = {
         body: 'First post body',
         published: true,
       };
+    },
+
+    greeting(parent, { name = 'Anonymous' }, ctx, info) {
+      return `Hello ${name}`;
     },
   },
 };
