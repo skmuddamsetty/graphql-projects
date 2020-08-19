@@ -91,7 +91,8 @@ const typeDefs = `
   }
 
   type Mutation {
-    createUser(name: String!, email: String!, age: Int): User!
+    createUser(name: String!, email: String!, age: Int): User!,
+    createPost(title: String!, body: String!, published: Boolean!, author: ID!): Post!
   }
 
   type User {
@@ -161,6 +162,7 @@ const resolvers = {
       return comments;
     },
   },
+  // Mutations
   Mutation: {
     createUser(parent, { email, name, age = null }, ctx, info) {
       // array.some is going to return true if the condition is satsified by any item in the users array
@@ -171,6 +173,21 @@ const resolvers = {
       const user = { id: uuidv4(), name, email, age };
       users.push(user);
       return user;
+    },
+    createPost(parent, { title, body, published, author }, ctx, info) {
+      const userExists = users.some((currUser) => currUser.id === author);
+      if (!userExists) {
+        throw new Error('User does not exist!');
+      }
+      const post = {
+        id: uuidv4(),
+        title,
+        body,
+        published,
+        author,
+      };
+      posts.push(post);
+      return post;
     },
   },
   // Custom Resolvers
