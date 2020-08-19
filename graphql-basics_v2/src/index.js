@@ -52,12 +52,32 @@ const posts = [
     author: '3',
   },
 ];
+
+const comments = [
+  {
+    id: '10',
+    text: 'I am good',
+  },
+  {
+    id: '11',
+    text: 'What is this?',
+  },
+  {
+    id: '12',
+    text: 'GraphQL is awesome',
+  },
+  {
+    id: '3',
+    text: 'GraphQL is super flexible',
+  },
+];
 // String, Boolean, Int, Float, ID --> 5 Scalar Types i.e. stores a single value
 // Type Definitions (schema)
 const typeDefs = `
   type Query {
-    users(query: String): [User!]!
-    posts(query: String): [Post!]!
+    users(query: String): [User!]!,
+    posts(query: String): [Post!]!,
+    comments: [Comment!]!
     me: User!,
     post: Post!
   }
@@ -76,6 +96,11 @@ const typeDefs = `
     body: String!,
     published: Boolean!
     author: User!
+  }
+
+  type Comment {
+    id: ID!,
+    text: String!
   }
 `;
 
@@ -115,6 +140,9 @@ const resolvers = {
           post.title.toLowerCase().includes(query.toLowerCase()) ||
           post.body.toLowerCase().includes(query.toLowerCase())
       );
+    },
+    comments(parent, args, ctx, info) {
+      return comments;
     },
   },
   // Custom Resolvers
