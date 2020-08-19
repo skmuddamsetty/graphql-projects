@@ -28,24 +28,28 @@ const posts = [
     title: 'First Post',
     body: 'First Post Body',
     published: true,
+    author: '1',
   },
   {
     id: '2',
     title: 'Second Post',
     body: 'Second Post Body',
     published: true,
+    author: '2',
   },
   {
     id: '3',
     title: 'Third Post',
     body: 'Third Post Body',
     published: false,
+    author: '1',
   },
   {
     id: '4',
     title: 'Fourth Post',
     body: 'Fourth Post Body',
     published: false,
+    author: '3',
   },
 ];
 // String, Boolean, Int, Float, ID --> 5 Scalar Types i.e. stores a single value
@@ -62,7 +66,8 @@ const typeDefs = `
     id: ID!,
     name: String!,
     email: String!,
-    age: Int
+    age: Int,
+    posts: [Post!]!
   }
 
   type Post {
@@ -70,6 +75,7 @@ const typeDefs = `
     title: String!,
     body: String!,
     published: Boolean!
+    author: User!
   }
 `;
 
@@ -109,6 +115,30 @@ const resolvers = {
           post.title.toLowerCase().includes(query.toLowerCase()) ||
           post.body.toLowerCase().includes(query.toLowerCase())
       );
+    },
+  },
+  // Custom Resolvers
+  // Below names should match with the type Property
+  // Below "Post" resolver is run for every post being that is being processed
+  // and in the type "Post" we have author property
+  // to populate that author property we are using custom resolver
+  Post: {
+    // first argument is "parent" and here "parent" is the current post that is being processed
+    author({ author }, args, ctx, info) {
+      // here we are using find method in the array specifically
+      // because this resolver function should return true
+      // or false and find exactly does that
+      // it returns true if the user is found and false if not
+      return users.find((user) => user.id === author);
+    },
+  },
+  // Below User resolver is going to run for every User found
+  // since we have posts property in type "User" to resolve the posts property
+  // we are having this custom resolver
+  User: {
+    // parent here is the user that is being processed
+    posts({ id }, args, ctx, info) {
+      return posts.filter((post) => post.author === id);
     },
   },
 };
