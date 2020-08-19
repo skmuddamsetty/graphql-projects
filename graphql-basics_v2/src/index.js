@@ -57,18 +57,22 @@ const comments = [
   {
     id: '10',
     text: 'I am good',
+    author: '1',
   },
   {
     id: '11',
     text: 'What is this?',
+    author: '2',
   },
   {
     id: '12',
     text: 'GraphQL is awesome',
+    author: '1',
   },
   {
-    id: '3',
+    id: '13',
     text: 'GraphQL is super flexible',
+    author: '3',
   },
 ];
 // String, Boolean, Int, Float, ID --> 5 Scalar Types i.e. stores a single value
@@ -87,7 +91,8 @@ const typeDefs = `
     name: String!,
     email: String!,
     age: Int,
-    posts: [Post!]!
+    posts: [Post!]!,
+    comments: [Comment!]!
   }
 
   type Post {
@@ -100,7 +105,8 @@ const typeDefs = `
 
   type Comment {
     id: ID!,
-    text: String!
+    text: String!,
+    author: User!
   }
 `;
 
@@ -167,6 +173,21 @@ const resolvers = {
     // parent here is the user that is being processed
     posts({ id }, args, ctx, info) {
       return posts.filter((post) => post.author === id);
+    },
+    comments({ id }, args, ctx, info) {
+      return comments.filter((comment) => comment.author === id);
+    },
+  },
+  // Below Comment resolver is going to run for every Comment found
+  // since we have author property in type "Comment" to resolve the author property
+  // we are having this custom resolver
+  Comment: {
+    // parent here is the Comment that is being processed
+    // looping through the users array to find the person who created the comment
+    // destructured property from first argument i.e. parent comes from the Comment that
+    // is being processed
+    author({ author }, args, ctx, info) {
+      return users.find((user) => user.id === author);
     },
   },
 };
