@@ -91,9 +91,9 @@ const typeDefs = `
   }
 
   type Mutation {
-    createUser(name: String!, email: String!, age: Int): User!,
-    createPost(title: String!, body: String!, published: Boolean!, author: ID!): Post!,
-    createComment(text: String!, author: ID!, post: ID!): Comment!
+    createUser(data: CreateUserInput): User!,
+    createPost(data: CreatePostInput): Post!,
+    createComment(data: CreateCommentInput): Comment!
   }
 
   type User {
@@ -119,6 +119,25 @@ const typeDefs = `
     text: String!,
     author: User!
     post: Post!
+  }
+
+  input CreateUserInput {
+    name: String!,
+    email: String!
+    age: Int
+  }
+
+  input CreatePostInput {
+    title: String!,
+    body: String!,
+    published: Boolean!
+    author: ID!
+  }
+
+  input CreateCommentInput {
+    text: String!,
+    author: ID!,
+    post: ID!
   }
 `;
 
@@ -165,32 +184,32 @@ const resolvers = {
   },
   // Mutations
   Mutation: {
-    createUser(parent, { email, name, age = null }, ctx, info) {
+    createUser(parent, { data }, ctx, info) {
       // array.some is going to return true if the condition is satsified by any item in the users array
+      const { email } = data;
       const emailTaken = users.some((currUser) => currUser.email === email);
       if (emailTaken) {
         throw new Error('Email Taken!');
       }
-      const user = { id: uuidv4(), name, email, age };
+      const user = { id: uuidv4(), ...data };
       users.push(user);
       return user;
     },
-    createPost(parent, { title, body, published, author }, ctx, info) {
+    createPost(parent, { data }, ctx, info) {
+      const { author } = data;
       const userExists = users.some((currUser) => currUser.id === author);
       if (!userExists) {
         throw new Error('User does not exist!');
       }
       const post = {
         id: uuidv4(),
-        title,
-        body,
-        published,
-        author,
+        ...data,
       };
       posts.push(post);
       return post;
     },
-    createComment(parent, { text, author, post }, ctx, info) {
+    createComment(parent, { data }, ctx, info) {
+      const { author, post } = data;
       const userExists = users.some((currUser) => currUser.id === author);
       if (!userExists) {
         throw new Error('User does not exist!');
@@ -203,9 +222,7 @@ const resolvers = {
       }
       const comment = {
         id: uuidv4(),
-        text,
-        author,
-        post,
+        ...data,
       };
       comments.push(comment);
       return comment;
