@@ -92,7 +92,8 @@ const typeDefs = `
 
   type Mutation {
     createUser(name: String!, email: String!, age: Int): User!,
-    createPost(title: String!, body: String!, published: Boolean!, author: ID!): Post!
+    createPost(title: String!, body: String!, published: Boolean!, author: ID!): Post!,
+    createComment(text: String!, author: ID!, post: ID!): Comment!
   }
 
   type User {
@@ -188,6 +189,26 @@ const resolvers = {
       };
       posts.push(post);
       return post;
+    },
+    createComment(parent, { text, author, post }, ctx, info) {
+      const userExists = users.some((currUser) => currUser.id === author);
+      if (!userExists) {
+        throw new Error('User does not exist!');
+      }
+      const postExists = posts.some(
+        (currPost) => currPost.id === post && currPost.published
+      );
+      if (!postExists) {
+        throw new Error('Post does not exist');
+      }
+      const comment = {
+        id: uuidv4(),
+        text,
+        author,
+        post,
+      };
+      comments.push(comment);
+      return comment;
     },
   },
   // Custom Resolvers
