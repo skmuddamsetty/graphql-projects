@@ -58,21 +58,25 @@ const comments = [
     id: '10',
     text: 'I am good',
     author: '1',
+    post: '1',
   },
   {
     id: '11',
     text: 'What is this?',
     author: '2',
+    post: '1',
   },
   {
     id: '12',
     text: 'GraphQL is awesome',
     author: '1',
+    post: '2',
   },
   {
     id: '13',
     text: 'GraphQL is super flexible',
     author: '3',
+    post: '3',
   },
 ];
 // String, Boolean, Int, Float, ID --> 5 Scalar Types i.e. stores a single value
@@ -99,14 +103,16 @@ const typeDefs = `
     id: ID!,
     title: String!,
     body: String!,
-    published: Boolean!
-    author: User!
+    published: Boolean!,
+    author: User!,
+    comments: [Comment!]!
   }
 
   type Comment {
     id: ID!,
     text: String!,
     author: User!
+    post: Post!
   }
 `;
 
@@ -165,6 +171,9 @@ const resolvers = {
       // it returns true if the user is found and false if not
       return users.find((user) => user.id === author);
     },
+    comments({ id }, args, ctx, info) {
+      return comments.filter((comment) => comment.post === id);
+    },
   },
   // Below User resolver is going to run for every User found
   // since we have posts property in type "User" to resolve the posts property
@@ -188,6 +197,9 @@ const resolvers = {
     // is being processed
     author({ author }, args, ctx, info) {
       return users.find((user) => user.id === author);
+    },
+    post({ post }, args, ctx, info) {
+      return posts.find((currentPost) => currentPost.id === post);
     },
   },
 };
