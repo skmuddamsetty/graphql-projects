@@ -1,5 +1,5 @@
 import { GraphQLServer } from 'graphql-yoga';
-import uuidv4 from 'uuid/v4';
+
 // Demo Users data
 const users = [
   {
@@ -90,10 +90,6 @@ const typeDefs = `
     post: Post!
   }
 
-  type Mutation {
-    createUser(name: String!, email: String!, age: Int): User!
-  }
-
   type User {
     id: ID!,
     name: String!,
@@ -159,18 +155,6 @@ const resolvers = {
     },
     comments(parent, args, ctx, info) {
       return comments;
-    },
-  },
-  Mutation: {
-    createUser(parent, { email, name, age = null }, ctx, info) {
-      // array.some is going to return true if the condition is satsified by any item in the users array
-      const emailTaken = users.some((currUser) => currUser.email === email);
-      if (emailTaken) {
-        throw new Error('Email Taken!');
-      }
-      const user = { id: uuidv4(), name, email, age };
-      users.push(user);
-      return user;
     },
   },
   // Custom Resolvers
