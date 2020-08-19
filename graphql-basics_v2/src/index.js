@@ -3,19 +3,19 @@ import { GraphQLServer } from 'graphql-yoga';
 // Demo Users data
 const users = [
   {
-    id: 1,
+    id: '1',
     name: 'Santhosh',
     email: 'santhosh@example.com',
     age: 30,
   },
   {
-    id: 2,
+    id: '2',
     name: 'Sunitha',
     email: 'sunitha@example.com',
     age: 28,
   },
   {
-    id: 3,
+    id: '3',
     name: 'Lakhi',
     email: 'lakhi@example.com',
     age: 2,
@@ -24,25 +24,25 @@ const users = [
 
 const posts = [
   {
-    id: 1,
+    id: '1',
     title: 'First Post',
     body: 'First Post Body',
     published: true,
   },
   {
-    id: 2,
+    id: '2',
     title: 'Second Post',
     body: 'Second Post Body',
     published: true,
   },
   {
-    id: 3,
+    id: '3',
     title: 'Third Post',
     body: 'Third Post Body',
     published: false,
   },
   {
-    id: 4,
+    id: '4',
     title: 'Fourth Post',
     body: 'Fourth Post Body',
     published: false,
