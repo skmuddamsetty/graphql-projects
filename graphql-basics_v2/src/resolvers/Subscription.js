@@ -16,6 +16,17 @@ const Subscription = {
       return pubsub.asyncIterator('count');
     },
   },
+  comment: {
+    subscribe(parent, { postId }, { pubsub, db }, info) {
+      const post = db.posts.find(
+        (currPost) => currPost.id === postId && currPost.published
+      );
+      if (!post) {
+        throw new Error('Post does not exist');
+      }
+      return pubsub.asyncIterator(`comment ${postId}`);
+    },
+  },
 };
 
 export { Subscription as default };

@@ -7,9 +7,10 @@ const Comment = {
   // destructured property from first argument i.e. parent comes from the Comment that
   // is being processed
   author({ author }, args, { db }, info) {
+    console.log(db);
     return db.users.find((user) => user.id === author);
   },
-  post({ post }, args, ctx, info) {
+  post({ post }, args, { db }, info) {
     return db.posts.find((currentPost) => currentPost.id === post);
   },
 };
