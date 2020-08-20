@@ -83,6 +83,23 @@ const Mutation = {
 
     return deletedPosts[0];
   },
+  updatePost(parent, { id, data }, { db }, info) {
+    // verify post exists
+    const post = db.posts.find((currentPost) => currentPost.id === id);
+    if (!post) {
+      throw new Error('Post does not exist');
+    }
+    if (typeof data.title === 'string') {
+      post.title = data.title;
+    }
+    if (typeof data.body === 'string') {
+      post.body = data.body;
+    }
+    if (typeof data.published === 'boolean') {
+      post.published = data.published;
+    }
+    return post;
+  },
   createComment(parent, { data }, { db }, info) {
     const { author, post } = data;
     const userExists = db.users.some((currUser) => currUser.id === author);
@@ -114,6 +131,17 @@ const Mutation = {
     const deletedComments = db.comments.splice(commentIndex, 1);
 
     return deletedComments[0];
+  },
+  updateComment(parent, { id, data }, { db }, info) {
+    // verify comment exists
+    const comment = db.comments.find((currComment) => currComment.id === id);
+    if (!comment) {
+      throw new Error('Comment does not exist');
+    }
+    if (typeof data.comment === 'string') {
+      comment.text = data.text;
+    }
+    return comment;
   },
 };
 
