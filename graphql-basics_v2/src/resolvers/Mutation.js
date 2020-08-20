@@ -138,7 +138,7 @@ const Mutation = {
     if (!comment) {
       throw new Error('Comment does not exist');
     }
-    if (typeof data.comment === 'string') {
+    if (typeof data.text === 'string') {
       comment.text = data.text;
     }
     return comment;
