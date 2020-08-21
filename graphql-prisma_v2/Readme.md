@@ -149,3 +149,7 @@ mutation{
   }
 }
 ```
+
+# read later
+
+prisma-bindings
