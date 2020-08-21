@@ -31,6 +31,43 @@ query {
 
 ## Mutations
 
+# createUser
+
+```
+mutation{
+  createUser(data:{name:"Sunitha", email:"sun@gmail.com"}){
+    id,
+    name,
+    email
+  }
+}
+```
+
+# deleteUser
+
+```
+mutation{
+  deleteUser(where:{id:"cke47plxe001b0970rl9vgfgk"}){
+    id,
+    name
+  }
+}
+```
+
+# updateUser
+
+```
+mutation{
+  updateUser(
+    data:{name:"Santhosh Kumar"},
+    where:{id:"cke47plxe001b0970rl9vgfgk"}
+  ){
+    id,
+    name
+  }
+}
+```
+
 # createPost
 
 ```
