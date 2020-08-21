@@ -11,6 +11,36 @@ sudo docker-compose up -d
 
 prisma deploy
 
+# .graphqlconfig
+
+```
+// using schemaPath we are telling the cli where it should place the generated schema file
+// here we are telling that to place the generated schema file into generated folder with name prisma.graphql
+// endPoints specify to which url it should connect to while generating the schema
+{
+  "projects": {
+    "prisma": {
+      "schemaPath": "src/generated/prisma.graphql",
+      "extensions": {
+        "endpoints": {
+          "default": "http://localhost:4466"
+        }
+      }
+    }
+  }
+}
+
+```
+
+# package.json schema generation command
+
+Here we are telling cli to run get-schema command and to use the project with name "prisma"
+When we run this command it is going to use datamodel.graphql inside this prisma folder to generate the schema
+
+```
+"get-schema": "graphql get-schema -p prisma"
+```
+
 ## Queries
 
 # comments
