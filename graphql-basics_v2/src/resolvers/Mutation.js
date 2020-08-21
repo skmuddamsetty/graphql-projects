@@ -69,26 +69,37 @@ const Mutation = {
     };
     db.posts.push(post);
     if (published) {
-      pubsub.publish('post', { post });
+      pubsub.publish('post', {
+        post: {
+          mutation: 'CREATED',
+          data: post,
+        },
+      });
     }
     return post;
   },
-  deletePost(parent, args, { db }, info) {
+  deletePost(parent, args, { db, pubsub }, info) {
     const postIndex = db.posts.findIndex((post) => post.id === args.id);
 
     if (postIndex === -1) {
       throw new Error('Post not found');
     }
 
-    const deletedPosts = db.posts.splice(postIndex, 1);
+    const [deletedPost] = db.posts.splice(postIndex, 1);
 
     db.comments = db.comments.filter((comment) => comment.post !== args.id);
-
-    return deletedPosts[0];
+    // publishing only if the post is published
+    if (deletedPost.published) {
+      pubsub.publish('post', {
+        post: { mutation: 'DELETED', data: deletedPost },
+      });
+    }
+    return deletedPost;
   },
-  updatePost(parent, { id, data }, { db }, info) {
+  updatePost(parent, { id, data }, { db, pubsub }, info) {
     // verify post exists
     const post = db.posts.find((currentPost) => currentPost.id === id);
+    const originalPost = { ...post };
     if (!post) {
       throw new Error('Post does not exist');
     }
@@ -100,6 +111,21 @@ const Mutation = {
     }
     if (typeof data.published === 'boolean') {
       post.published = data.published;
+      if (originalPost.published && !post.published) {
+        // deleted
+        pubsub.publish('post', {
+          post: {
+            mutation: 'DELETED',
+            data: originalPost,
+          },
+        });
+      } else if (!originalPost.published && post.published) {
+        // created
+        pubsub.publish('post', { post: { mutation: 'CREATED', data: post } });
+      }
+    } else if (post.published) {
+      //updated
+      pubsub.publish('post', { post: { mutation: 'UPDATED', data: post } });
     }
     return post;
   },
