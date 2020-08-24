@@ -183,3 +183,15 @@ mutation{
 # read later
 
 prisma-bindings
+
+# creating new prisma project
+
+1. duplicate the prisma folder with a different name for ex: prisma-review-website
+
+2. delete docker-compose.yml as a file was already present in the prisma folder
+
+3. in prisma.yml in new folder change the endpoint url: http://localhost:4466/reviews/default
+4. reviews in the url is service name (project name)
+5. default in the url is stage name(can be anything, if you did not pick anything, it will be default)
+6. go to prisma-review-website folder and run prisma deploy to deploy the new project
+7. visit localhost:4466/reviews/default
