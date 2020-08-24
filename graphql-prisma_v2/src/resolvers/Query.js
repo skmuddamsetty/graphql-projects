@@ -72,8 +72,8 @@ const Query = {
     return prisma.query.posts(opArgs, info);
     // using real time data from database end
   },
-  comments(parent, args, { db }, info) {
-    return db.comments;
+  comments(parent, args, { db, prisma }, info) {
+    return prisma.query.comments(null, info);
   },
 };
 
