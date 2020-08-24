@@ -1,38 +1,48 @@
 import uuidv4 from 'uuid/v4';
 
 const Mutation = {
-  createUser(parent, { data }, { db }, info) {
-    // array.some is going to return true if the condition is satsified by any item in the users array
+  async createUser(parent, { data }, { prisma }, info) {
     const { email } = data;
-    const emailTaken = db.users.some((currUser) => currUser.email === email);
+    const emailTaken = await prisma.exists.User({ email: email });
     if (emailTaken) {
       throw new Error('Email Taken!');
     }
-    const user = { id: uuidv4(), ...data };
-    db.users.push(user);
-    return user;
+    // returning promise
+    return await prisma.mutation.createUser({ data }, info);
+    /*********Commenting old code which refers to static data start */
+    // // array.some is going to return true if the condition is satsified by any item in the users array
+    // const { email } = data;
+    // const emailTaken = db.users.some((currUser) => currUser.email === email);
+    // if (emailTaken) {
+    //   throw new Error('Email Taken!');
+    // }
+    // const user = { id: uuidv4(), ...data };
+    // db.users.push(user);
+    // return user;
+    /*********Commenting old code which refers to static data end */
   },
-  deleteUser(parent, args, { db }, info) {
-    const userIndex = db.users.findIndex((user) => user.id === args.id);
-
-    if (userIndex === -1) {
-      throw new Error('User not found');
+  async deleteUser(parent, args, { prisma }, info) {
+    const user = await prisma.exists.User({ id: args.id });
+    if (!user) {
+      throw new Error('User not found!');
     }
-
-    const deletedUsers = db.users.splice(userIndex, 1);
-
-    db.posts = db.posts.filter((post) => {
-      const match = post.author === args.id;
-
-      if (match) {
-        db.comments = db.comments.filter((comment) => comment.post !== post.id);
-      }
-
-      return !match;
-    });
-    db.comments = db.comments.filter((comment) => comment.author !== args.id);
-
-    return deletedUsers[0];
+    return await prisma.mutation.deleteUser({ where: { id: args.id } }, info);
+    /*********Commenting old code which refers to static data start */
+    // const userIndex = db.users.findIndex((user) => user.id === args.id);
+    // if (userIndex === -1) {
+    //   throw new Error('User not found');
+    // }
+    // const deletedUsers = db.users.splice(userIndex, 1);
+    // db.posts = db.posts.filter((post) => {
+    //   const match = post.author === args.id;
+    //   if (match) {
+    //     db.comments = db.comments.filter((comment) => comment.post !== post.id);
+    //   }
+    //   return !match;
+    // });
+    // db.comments = db.comments.filter((comment) => comment.author !== args.id);
+    // return deletedUsers[0];
+    /*********Commenting old code which refers to static data end */
   },
   updateUser(parent, { id, data }, { db }, info) {
     const user = db.users.find((currUser) => currUser.id === id);
