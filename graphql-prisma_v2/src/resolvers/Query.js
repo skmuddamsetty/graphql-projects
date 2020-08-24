@@ -25,7 +25,25 @@ const Query = {
     // );
     // // using static data end
     // using real time data from database start
-    return prisma.query.users(null, info);
+    const opArgs = {};
+    if (query.length > 0) {
+      // example of using name_contains
+      // opArgs.where = {
+      //   // name_contains came from the prisma docs
+      //   name_contains: query,
+      // };
+
+      // example of using OR in the query
+      opArgs.where = {
+        OR: [
+          {
+            name_contains: query,
+          },
+          { email_contains: query },
+        ],
+      };
+    }
+    return prisma.query.users(opArgs, info);
     // using real time data from database end
   },
   posts(parent, { query = '' }, { prisma }, info) {
@@ -40,7 +58,18 @@ const Query = {
     // );
     // // using static data end
     // using real time data from database start
-    return prisma.query.posts(null, info);
+    const opArgs = {};
+    if (query.length > 0) {
+      opArgs.where = {
+        OR: [
+          {
+            title_contains: query,
+          },
+          { body_contains: query },
+        ],
+      };
+    }
+    return prisma.query.posts(opArgs, info);
     // using real time data from database end
   },
   comments(parent, args, { db }, info) {
