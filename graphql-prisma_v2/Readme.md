@@ -195,3 +195,125 @@ prisma-bindings
 5. default in the url is stage name(can be anything, if you did not pick anything, it will be default)
 6. go to prisma-review-website folder and run prisma deploy to deploy the new project
 7. visit localhost:4466/reviews/default
+
+# Review System Queries
+
+# queries
+
+users
+
+```
+query {
+  users{
+    id,
+    username,
+    reviews{
+      id,text
+    }
+  }
+}
+```
+
+reviews
+
+```
+query {
+  reviews {
+    id,
+    text,
+    author{
+      id,username
+    }
+  }
+}
+```
+
+# mutations
+
+createUser
+
+```
+# Write your query or mutation here
+mutation {
+  createUser(data:{username:"ssunitha"}) {
+    username,
+    reviews {
+      id,
+      text,
+      rating
+    }
+  }
+}
+```
+
+createBook
+
+```
+mutation {
+  createBook(data:{title:"GraphQl Book",author:"Santhosh",isbn:"23123fbsfb2313"}){
+    id,
+    title,
+    author,
+    isbn
+  }
+}
+```
+
+createReview
+
+```
+mutation {
+  createReview(data:{text: "Second Review",rating: 5,
+  book:{
+    connect:{
+      id:"cke8fmrh101550970m1s9qohz"
+    }
+  },
+  author: {
+    connect: {
+      id: "cke8fqwt8017w09704wtcb8s0"
+    }
+  }
+  }
+  ){
+    id,
+    text,
+    rating,
+    author {
+      id,
+      username
+    },
+    book {
+      id,
+      title
+    }
+  }
+}
+```
+
+deleteUser
+
+```
+mutation {
+  deleteUser(where:{id:"cke8fks4t013w0970zzyi6gzz"}){
+    id,
+    username
+  }
+}
+```
+
+deleteBook
+
+```
+mutation {
+  deleteBook(where:{id:"cke8fmrh101550970m1s9qohz"}){
+    id,
+    title,
+    author,
+    reviews {
+      id,
+      text
+    }
+  }
+}
+```
