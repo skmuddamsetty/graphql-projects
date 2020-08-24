@@ -15,23 +15,33 @@ const Query = {
       published: true,
     };
   },
-  users(parent, { query = '' }, { db }, info) {
-    if (query.length === 0) {
-      return db.users;
-    }
-    return db.users.filter((user) =>
-      user.name.toLowerCase().includes(query.toLowerCase())
-    );
+  users(parent, { query = '' }, { prisma }, info) {
+    // // using static data start
+    // if (query.length === 0) {
+    //   return db.users;
+    // }
+    // return db.users.filter((user) =>
+    //   user.name.toLowerCase().includes(query.toLowerCase())
+    // );
+    // // using static data end
+    // using real time data from database start
+    return prisma.query.users(null, info);
+    // using real time data from database end
   },
-  posts(parent, { query = '' }, { db }, info) {
-    if (query.length === 0) {
-      return db.posts;
-    }
-    return db.posts.filter(
-      (post) =>
-        post.title.toLowerCase().includes(query.toLowerCase()) ||
-        post.body.toLowerCase().includes(query.toLowerCase())
-    );
+  posts(parent, { query = '' }, { prisma }, info) {
+    // // using static data start
+    // if (query.length === 0) {
+    //   return db.posts;
+    // }
+    // return db.posts.filter(
+    //   (post) =>
+    //     post.title.toLowerCase().includes(query.toLowerCase()) ||
+    //     post.body.toLowerCase().includes(query.toLowerCase())
+    // );
+    // // using static data end
+    // using real time data from database start
+    return prisma.query.posts(null, info);
+    // using real time data from database end
   },
   comments(parent, args, { db }, info) {
     return db.comments;
