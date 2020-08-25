@@ -1,35 +1,28 @@
 const Subscription = {
-  count: {
-    subscribe(parent, args, { pubsub }, info) {
-      let count = 0;
-      setInterval(() => {
-        count++;
-        // publishing the data using the publish method
-        // first argument is the channel name
-        // second argument is the data
-        // channel name should match with the channel name given to pubsub.asyncIterator
-        pubsub.publish('count', {
-          count,
-        });
-      }, 1000);
-      // creating a channel name with "count"
-      return pubsub.asyncIterator('count');
-    },
-  },
   comment: {
-    subscribe(parent, { postId }, { pubsub, db }, info) {
-      const post = db.posts.find(
-        (currPost) => currPost.id === postId && currPost.published
+    subscribe(parent, { postId }, { prisma }, info) {
+      // flow of data
+      // Prisma --> Node --> Client (GraphQL playground)
+      return prisma.subscription.comment(
+        { where: { node: { post: { id: postId } } } },
+        info
       );
-      if (!post) {
-        throw new Error('Post does not exist');
-      }
-      return pubsub.asyncIterator(`comment ${postId}`);
+      /****Commenting old code */
+      //   const post = db.posts.find(
+      //     (currPost) => currPost.id === postId && currPost.published
+      //   );
+      //   if (!post) {
+      //     throw new Error('Post does not exist');
+      //   }
+      //   return pubsub.asyncIterator(`comment ${postId}`);
+      // },
+      /****Commenting old code */
     },
   },
   post: {
-    subscribe(parent, args, { pubsub, db }, info) {
-      return pubsub.asyncIterator('post');
+    subscribe(parent, args, { prisma }, info) {
+      return prisma.subscription.post({ where: { node: { published: true } } });
+      // return pubsub.asyncIterator('post');
     },
   },
 };
