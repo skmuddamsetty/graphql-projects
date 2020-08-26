@@ -9,7 +9,30 @@ import jwt from 'jsonwebtoken';
 // const verifiedToken = jwt.verify(token, 'mysecret');
 // console.log(verifiedToken);
 
+// const dummy = async () => {
+//   const password = 'password123';
+//   const hashedPassword =
+//     '$2a$10$vF/.fm0zygs/P7I9U993RuPMpr8HE7Rx/r4IT1sHeDu5WAyT4ScOK';
+//   const isMatched = await brcypt.compare(password, hashedPassword);
+//   console.log(isMatched);
+// };
+// dummy();
+
 const Mutation = {
+  async login(parent, { data }, { prisma }, info) {
+    const user = await prisma.query.user({ where: { email: data.email } });
+    if (!user) {
+      throw new Error('Invalid Credentials!');
+    }
+    const passwordMatch = await brcypt.compare(data.password, user.password);
+    if (!passwordMatch) {
+      throw new Error('Invalid Credentials!');
+    }
+    return {
+      user,
+      token: jwt.sign({ userId: user.id }, 'thisisasecret'),
+    };
+  },
   async createUser(parent, { data }, { prisma }, info) {
     const { email, password } = data;
     // validating the password
