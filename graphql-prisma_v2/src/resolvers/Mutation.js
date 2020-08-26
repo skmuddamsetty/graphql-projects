@@ -1,12 +1,36 @@
+import brcypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+
+// creating a token
+// const token = jwt.sign({ id: 46 }, 'mysecret');
+// console.log(token);
+// const decoded = jwt.decode(token);
+// console.log(decoded);
+// const verifiedToken = jwt.verify(token, 'mysecret');
+// console.log(verifiedToken);
+
 const Mutation = {
   async createUser(parent, { data }, { prisma }, info) {
-    const { email } = data;
+    const { email, password } = data;
+    // validating the password
+    if (password.length < 8) {
+      throw new Error('Password must be 8 characters or longer!');
+    }
     const emailTaken = await prisma.exists.User({ email: email });
     if (emailTaken) {
       throw new Error('Email Taken!');
     }
+    // hashing the password
+    const hashedPassword = await brcypt.hash(password, 10);
+
     // returning promise
-    return await prisma.mutation.createUser({ data }, info);
+    const user = await prisma.mutation.createUser({
+      data: { ...data, password: hashedPassword },
+    });
+    return {
+      user,
+      token: jwt.sign({ userId: user.id }, 'thisisasecret'),
+    };
   },
   async deleteUser(parent, args, { prisma }, info) {
     const user = await prisma.exists.User({ id: args.id });
