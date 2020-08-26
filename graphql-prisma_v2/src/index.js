@@ -19,7 +19,9 @@ const server = new GraphQLServer({
     Post,
     Comment,
   },
-  context: { db, pubsub, prisma },
+  context(request) {
+    return { db, pubsub, prisma, request };
+  },
 });
 server.start(() => {
   console.log('GraphQL server is up');
