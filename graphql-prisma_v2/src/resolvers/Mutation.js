@@ -1,80 +1,82 @@
-import brcypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import getUserId from '../utils/getUserId';
 
-// creating a token
-// const token = jwt.sign({ id: 46 }, 'mysecret');
-// console.log(token);
-// const decoded = jwt.decode(token);
-// console.log(decoded);
-// const verifiedToken = jwt.verify(token, 'mysecret');
-// console.log(verifiedToken);
-
-// const dummy = async () => {
-//   const password = 'password123';
-//   const hashedPassword =
-//     '$2a$10$vF/.fm0zygs/P7I9U993RuPMpr8HE7Rx/r4IT1sHeDu5WAyT4ScOK';
-//   const isMatched = await brcypt.compare(password, hashedPassword);
-//   console.log(isMatched);
-// };
-// dummy();
-
 const Mutation = {
-  async login(parent, { data }, { prisma }, info) {
-    const user = await prisma.query.user({ where: { email: data.email } });
-    if (!user) {
-      throw new Error('Invalid Credentials!');
+  async createUser(parent, args, { prisma }, info) {
+    if (args.data.password.length < 8) {
+      throw new Error('Password must be 8 characters or longer.');
     }
-    const passwordMatch = await brcypt.compare(data.password, user.password);
-    if (!passwordMatch) {
-      throw new Error('Invalid Credentials!');
-    }
-    return {
-      user,
-      token: jwt.sign({ userId: user.id }, 'thisisasecret'),
-    };
-  },
-  async createUser(parent, { data }, { prisma }, info) {
-    const { email, password } = data;
-    // validating the password
-    if (password.length < 8) {
-      throw new Error('Password must be 8 characters or longer!');
-    }
-    const emailTaken = await prisma.exists.User({ email: email });
-    if (emailTaken) {
-      throw new Error('Email Taken!');
-    }
-    // hashing the password
-    const hashedPassword = await brcypt.hash(password, 10);
 
-    // returning promise
+    const password = await bcrypt.hash(args.data.password, 10);
     const user = await prisma.mutation.createUser({
-      data: { ...data, password: hashedPassword },
+      data: {
+        ...args.data,
+        password,
+      },
     });
+
     return {
       user,
       token: jwt.sign({ userId: user.id }, 'thisisasecret'),
     };
   },
-  async deleteUser(parent, args, { prisma }, info) {
-    const user = await prisma.exists.User({ id: args.id });
+  async login(parent, args, { prisma }, info) {
+    const user = await prisma.query.user({
+      where: {
+        email: args.data.email,
+      },
+    });
+
     if (!user) {
-      throw new Error('User not found!');
+      throw new Error('Unable to login');
     }
-    return await prisma.mutation.deleteUser({ where: { id: args.id } }, info);
+
+    const isMatch = await bcrypt.compare(args.data.password, user.password);
+
+    if (!isMatch) {
+      throw new Error('Unable to login');
+    }
+
+    return {
+      user,
+      token: jwt.sign({ userId: user.id }, 'thisisasecret'),
+    };
   },
-  async updateUser(parent, { id, data }, { prisma }, info) {
-    return prisma.mutation.updateUser({ where: { id }, data }, info);
-  },
-  async createPost(parent, { data }, { prisma, request }, info) {
+  async deleteUser(parent, args, { prisma, request }, info) {
     const userId = getUserId(request);
-    const { title, body, published } = data;
+
+    return prisma.mutation.deleteUser(
+      {
+        where: {
+          id: userId,
+        },
+      },
+      info
+    );
+  },
+  async updateUser(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+
+    return prisma.mutation.updateUser(
+      {
+        where: {
+          id: userId,
+        },
+        data: args.data,
+      },
+      info
+    );
+  },
+  createPost(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+
     return prisma.mutation.createPost(
       {
         data: {
-          title,
-          body,
-          published,
+          title: args.data.title,
+          body: args.data.body,
+          published: args.data.published,
           author: {
             connect: {
               id: userId,
@@ -85,7 +87,19 @@ const Mutation = {
       info
     );
   },
-  async deletePost(parent, args, { prisma }, info) {
+  async deletePost(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+    const postExists = await prisma.exists.Post({
+      id: args.id,
+      author: {
+        id: userId,
+      },
+    });
+
+    if (!postExists) {
+      throw new Error('Unable to delete post');
+    }
+
     return prisma.mutation.deletePost(
       {
         where: {
@@ -95,28 +109,57 @@ const Mutation = {
       info
     );
   },
-  async updatePost(parent, { id, data }, { prisma }, info) {
-    return prisma.mutation.updatePost({ where: { id }, data }, info);
+  updatePost(parent, args, { prisma }, info) {
+    return prisma.mutation.updatePost(
+      {
+        where: {
+          id: args.id,
+        },
+        data: args.data,
+      },
+      info
+    );
   },
-  async createComment(parent, { data }, { prisma }, info) {
+  createComment(parent, args, { prisma }, info) {
     return prisma.mutation.createComment(
       {
         data: {
-          text: data.text,
-          author: { connect: { id: data.author } },
+          text: args.data.text,
+          author: {
+            connect: {
+              id: args.data.author,
+            },
+          },
           post: {
-            connect: { id: data.post },
+            connect: {
+              id: args.data.post,
+            },
           },
         },
       },
       info
     );
   },
-  async deleteComment(parent, { id }, { prisma }, info) {
-    return prisma.mutation.deleteComment({ where: { id } }, info);
+  deleteComment(parent, args, { prisma }, info) {
+    return prisma.mutation.deleteComment(
+      {
+        where: {
+          id: args.id,
+        },
+      },
+      info
+    );
   },
-  async updateComment(parent, { id, data }, { prisma }, info) {
-    return prisma.mutation.updateComment({ where: { id }, data }, info);
+  updateComment(parent, args, { prisma }, info) {
+    return prisma.mutation.updateComment(
+      {
+        where: {
+          id: args.id,
+        },
+        data: args.data,
+      },
+      info
+    );
   },
 };
 
